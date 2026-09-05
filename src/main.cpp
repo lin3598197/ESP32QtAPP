@@ -5,10 +5,24 @@
 #include "ui/MainWindow.h"
 #include "common/LogService.h"
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <QMessageBox>
+#endif
+
 int main(int argc, char *argv[]) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
+
+#ifdef Q_OS_WIN
+    HANDLE hMutex = CreateMutexW(NULL, TRUE, L"Local\\ESP32QtApp_SingleInstance_Lock");
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        // App is already running in another process
+        if (hMutex) CloseHandle(hMutex);
+        return 0;
+    }
 #endif
 
     QApplication app(argc, argv);
@@ -46,5 +60,13 @@ int main(int argc, char *argv[]) {
     // Start controller core (binds UDP socket, restores device store, auto-starts hotspot)
     controller.start();
 
-    return app.exec();
+    int exitCode = app.exec();
+
+#ifdef Q_OS_WIN
+    if (hMutex) {
+        CloseHandle(hMutex);
+    }
+#endif
+
+    return exitCode;
 }

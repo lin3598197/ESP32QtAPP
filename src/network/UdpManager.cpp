@@ -28,7 +28,7 @@ bool UdpManager::start(quint16 port) {
     refreshNetworkInterfaces();
 
     bool success = m_socket->bind(QHostAddress::AnyIPv4, m_port,
-                                  QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint);
+                                  QUdpSocket::DontShareAddress);
     if (success) {
         LogService::instance().info("UDP", QString("Socket successfully bound to port %1").arg(m_port));
         emit socketBound(m_port);

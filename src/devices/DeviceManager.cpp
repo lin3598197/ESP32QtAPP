@@ -117,6 +117,7 @@ void DeviceManager::handleHello(const Protocol::HelloPacket& hello, const QHostA
         }
     }
 
+    bool wasNotOnline = (dev.status != DeviceStatus::Online);
     dev.status = DeviceStatus::Online;
     dev.lastMessage = "Online";
 
@@ -126,6 +127,10 @@ void DeviceManager::handleHello(const Protocol::HelloPacket& hello, const QHostA
         save();
         emit deviceListChanged();
     } else {
+        if (wasNotOnline) {
+            LogService::instance().info("DEV", QString("Device [%1 | %2] resumed ONLINE (%3:%4)")
+                .arg(dev.id, dev.mac, ip.toString()).arg(port));
+        }
         emit deviceUpdated(dev);
     }
 }
