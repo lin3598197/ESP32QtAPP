@@ -169,13 +169,87 @@ void MainWindow::setupUi() {
 
 void MainWindow::setupStyles() {
     setStyleSheet(R"(
-        QMainWindow { background-color: #f8f9fa; }
-        QGroupBox { font-weight: bold; border: 1px solid #dcdde1; border-radius: 6px; margin-top: 8px; padding-top: 10px; background-color: white; }
-        QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; color: #2c3e50; }
-        QLineEdit { padding: 5px; border: 1px solid #bdc3c7; border-radius: 4px; background: #ffffff; }
-        QLineEdit:focus { border: 1px solid #3498db; }
-        QTableWidget { border: 1px solid #dcdde1; border-radius: 4px; background-color: white; gridline-color: #ecf0f1; }
-        QHeaderView::section { background-color: #f1f2f6; padding: 4px; border: none; font-weight: bold; color: #2f3542; }
+        QMainWindow {
+            background-color: #f5f6fa;
+            color: #2f3542;
+        }
+        QWidget {
+            color: #2f3542;
+            font-size: 13px;
+        }
+        QLabel {
+            color: #2f3542;
+        }
+        QGroupBox {
+            font-weight: bold;
+            border: 1px solid #dcdde1;
+            border-radius: 6px;
+            margin-top: 10px;
+            padding-top: 12px;
+            background-color: #ffffff;
+            color: #2f3542;
+        }
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            left: 10px;
+            padding: 0 6px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        QLineEdit {
+            padding: 6px 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            background-color: #ffffff;
+            color: #2f3542;
+            selection-background-color: #2980b9;
+            selection-color: #ffffff;
+        }
+        QLineEdit:focus {
+            border: 1px solid #3498db;
+            color: #2f3542;
+        }
+        QLineEdit:disabled {
+            background-color: #f1f2f6;
+            color: #747d8c;
+        }
+        QCheckBox {
+            color: #2f3542;
+        }
+        QPushButton {
+            border-radius: 4px;
+        }
+        QTableWidget {
+            border: 1px solid #dcdde1;
+            border-radius: 4px;
+            background-color: #ffffff;
+            alternate-background-color: #f8f9fa;
+            gridline-color: #ecf0f1;
+            color: #2f3542;
+            selection-background-color: #2980b9;
+            selection-color: #ffffff;
+        }
+        QTableWidget::item {
+            color: #2f3542;
+            padding: 5px 8px;
+        }
+        QTableWidget::item:selected {
+            background-color: #2980b9;
+            color: #ffffff;
+        }
+        QTableWidget::item:hover:!selected {
+            background-color: #edf2f7;
+            color: #2f3542;
+        }
+        QHeaderView::section {
+            background-color: #f1f2f6;
+            padding: 6px 8px;
+            border: none;
+            border-bottom: 1px solid #dcdde1;
+            border-right: 1px solid #e4e7eb;
+            font-weight: bold;
+            color: #2f3542;
+        }
     )");
 }
 
@@ -285,6 +359,7 @@ void MainWindow::onHotspotClientCountChanged(int count) {
 
 QWidget* MainWindow::createStatusBadgeWidget(DeviceStatus status) {
     auto* container = new QWidget();
+    container->setStyleSheet("background: transparent;");
     auto* lay = new QHBoxLayout(container);
     lay->setContentsMargins(4, 2, 4, 2);
 
