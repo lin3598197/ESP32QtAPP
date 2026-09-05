@@ -17,14 +17,31 @@ DeviceManager::~DeviceManager() {
 }
 
 void DeviceManager::initialize() {
-    m_devices.clear();
-    m_store.load(m_devices);
+    m_devices.clear(); // Current session starts completely empty (no past history)
+    QMap<QString, DeviceRecord> historical;
+    m_store.load(historical);
+    for (auto it = historical.begin(); it != historical.end(); ++it) {
+        if (!it.value().id.isEmpty()) {
+            m_knownIdByMac[it.key()] = it.value().id;
+        }
+    }
     m_heartbeatTimer->start();
     emit deviceListChanged();
 }
 
 void DeviceManager::save() {
-    m_store.save(m_devices);
+    QMap<QString, DeviceRecord> toSave;
+    for (auto it = m_knownIdByMac.begin(); it != m_knownIdByMac.end(); ++it) {
+        DeviceRecord rec;
+        rec.mac = it.key();
+        rec.id = it.value();
+        rec.status = DeviceStatus::Offline;
+        toSave[it.key()] = rec;
+    }
+    for (auto it = m_devices.begin(); it != m_devices.end(); ++it) {
+        toSave[it.key()] = it.value();
+    }
+    m_store.save(toSave);
 }
 
 QList<DeviceRecord> DeviceManager::allDevices() const {
@@ -89,19 +106,22 @@ void DeviceManager::handleHello(const Protocol::HelloPacket& hello, const QHostA
             LogService::instance().info("DEV", QString("Device [%1] updated ID from '%2' to '%3'")
                 .arg(mac, dev.id, hello.id));
             dev.id = hello.id;
+            m_knownIdByMac[mac] = hello.id;
         }
     } else if (dev.id.isEmpty()) {
-        dev.id = allocateFallbackId(mac);
+        if (m_knownIdByMac.contains(mac)) {
+            dev.id = m_knownIdByMac[mac];
+        } else {
+            dev.id = allocateFallbackId(mac);
+            m_knownIdByMac[mac] = dev.id;
+        }
     }
 
-    // If device was Offline, restore to Online
-    if (dev.status == DeviceStatus::Offline || dev.status == DeviceStatus::Timeout) {
-        dev.status = DeviceStatus::Online;
-        dev.lastMessage = "Online";
-    }
+    dev.status = DeviceStatus::Online;
+    dev.lastMessage = "Online";
 
     if (isNew) {
-        LogService::instance().info("DEV", QString("New device registered: MAC=%1, ID=%2, IP=%3:%4")
+        LogService::instance().info("DEV", QString("Device connected in this session: MAC=%1, ID=%2, IP=%3:%4")
             .arg(mac, dev.id, ip.toString()).arg(port));
         save();
         emit deviceListChanged();

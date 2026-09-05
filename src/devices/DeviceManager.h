@@ -41,7 +41,8 @@ private slots:
 private:
     QString allocateFallbackId(const QString& mac);
 
-    QMap<QString, DeviceRecord> m_devices; // Key: Normalized MAC
+    QMap<QString, DeviceRecord> m_devices; // Key: Normalized MAC (Current session devices only)
+    QMap<QString, QString> m_knownIdByMac; // Historical MAC -> ID lookup
     DeviceStore m_store;
     QTimer* m_ackTimer{nullptr};
     QTimer* m_heartbeatTimer{nullptr};
